@@ -1,0 +1,3 @@
+##Get test
+GET http://localhost:3000/hello HTTP/1.1
+Host: localhost:3000
