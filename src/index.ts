@@ -11,11 +11,29 @@ app.get('/hello', (req: Request, res: Response) => {
     res.send('Hello, World!');
 });
 
+app.get('/hello/:id/:name', (req: Request, res: Response) => {
+    const id = req.params.id;
+    const name = req.params.name;
+    const message = `Hello, ${name}! Your ID is ${id}`;
 
-app.post('/echo', (req: Request, res: Response) => {
+    res.send({
+        message
+    });
+
+    //console.log(message);
+});
+
+
+app.post('/echo/:id/:name', (req: Request, res: Response) => {
+    const id = req.params.id;
+    const name = req.params.name;
+   
     res.send({
         data: req.body,
-        message: 'Data received successfully'
+        params: {
+            id,
+            name
+        }
     });
 });
 
