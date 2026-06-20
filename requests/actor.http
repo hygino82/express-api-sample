@@ -1,12 +1,8 @@
 ### Get test
-GET http://localhost:3000/hello HTTP/1.1
+GET http://localhost:3000/details/3 HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
-### Get test by id and name
-GET http://localhost:3000/hello/1010/John HTTP/1.1
-Host: localhost:3000
-Content-Type: application/json
 
 ### Post test
 POST http://localhost:3000/echo/1010/John HTTP/1.1
