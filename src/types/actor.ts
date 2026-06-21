@@ -4,3 +4,8 @@ export type Actor = {
     lastname: string;
     lastUpdate: Date;
 }
+
+export type RequestActorDto = {
+    firstName: string;
+    lastName: string;
+}

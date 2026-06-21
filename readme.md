@@ -20,3 +20,9 @@ npm run build
 ```bash 
 npm run start
 ```
+#Create .env file
+- DB_PORT
+- DB_HOST
+- DB_USER
+- DB_PASSWORD
+- DATABASE
