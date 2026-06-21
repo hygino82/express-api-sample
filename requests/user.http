@@ -1,0 +1,10 @@
+### Post test
+POST http://localhost:3000/user HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "email": "saci@miau.net",
+  "password": "123456",
+  "phoneNumber":"46987128"
+}

@@ -1,12 +1,20 @@
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 import type { Request, Response } from "express";
 import express from "express";
 import mysql from "mysql2";
-import type { RequestActorDto } from "./types/actor.js";
-import dotenv from "dotenv";
+import type { RequestUserDto } from "./types/user.js";
 
 dotenv.config();
 
 const app = express();
+
+async function encryptPassword(password: string): Promise<string> {
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  return hashedPassword;
+}
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -72,21 +80,8 @@ app.get("/details/:id", (req: Request, res: Response) => {
   });
 });
 
-app.post("/echo/:id/:name", (req: Request, res: Response) => {
-  const id = req.params.id;
-  const name = req.params.name;
-
-  res.status(201).send({
-    data: req.body,
-    params: {
-      id,
-      name,
-    },
-  });
-});
-
-app.post("/actor", (req: Request, res: Response) => {
-  pool.getConnection((err: any, connection: any) => {
+app.post("/user", (req: Request, res: Response) => {
+  pool.getConnection(async (err: any, connection: any) => {
     if (err) {
       console.error("Error connecting to the database:", err);
 
@@ -99,12 +94,13 @@ app.post("/actor", (req: Request, res: Response) => {
       return;
     }
 
-    const actor: RequestActorDto = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
+    const user: RequestUserDto = {
+      email: req.body.email,
+      password: req.body.password,
+      phoneNumber: req.body.phoneNumber,
     };
 
-    if (!actor.firstName || !actor.lastName) {
+    if (!user.email || !user.password || !user.phoneNumber) {
       connection.release();
 
       res.status(400).send({
@@ -116,11 +112,29 @@ app.post("/actor", (req: Request, res: Response) => {
       return;
     }
 
-    const query = "INSERT INTO tb_actor (first_name, last_name) VALUES (?, ?)";
+    let encryptedPassword: string;
+    try {
+      encryptedPassword = await encryptPassword(user.password);
+      console.log(encryptedPassword);
+    } catch (e) {
+      connection.release();
+      console.error("Error encrypting password:", e);
+      res.status(500).send({
+        success: false,
+        statusCode: 500,
+        message: "Error encrypting password",
+      });
+      return;
+    }
+
+    const query = "CALL register_user(?, ?, ?)";
+    //Call MySQL Stored Procedure
+
+    //const query = "INSERT INTO tb_user (email, phone_number, password, last_update) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
 
     connection.query(
       query,
-      [actor.firstName, actor.lastName],
+      [user.email, user.phoneNumber, encryptedPassword],
       (err: any, result: any) => {
         connection.release();
 
@@ -128,7 +142,7 @@ app.post("/actor", (req: Request, res: Response) => {
           res.status(400).send({
             success: false,
             statusCode: 400,
-            message: "Error executing query",
+            //err,
           });
 
           return;
@@ -138,7 +152,7 @@ app.post("/actor", (req: Request, res: Response) => {
           success: true,
           statusCode: 201,
           message: "Data inserted successfully",
-          data: result,
+          //data: result,
         });
       },
     );
